@@ -60,6 +60,9 @@ class Player(object):
         for hand in hands:
             self.hands.append(hand)
 
+    def init_hands(self):
+        self.hands = []
+
     def play_cards(self, delete_indices=[]):
         """
         プレイヤーがカードをプレイし、そのカードリストとそのうちの最大ランクを返す

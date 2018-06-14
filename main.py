@@ -2,7 +2,7 @@ import random
 
 from models import Deck, Card, FieldCards, Player
 
-
+import utils
 # Create your views here.
 
 
@@ -31,18 +31,25 @@ def main():
     player1 = Player(name='player1')
     player2 = Player(name='player2')
 
-    winner, winner_score = play_game(player1, player2, deck)
+    # winner, score = play_game(player1, player2, deck)
 
-    print(winner.name, winner_score)
+    # 10回試行する
+    datum = []
+    for i in range(10):
+        data = play_game(player1, player2, deck)
+        datum.append([data[0].name, data[1]])
+
+    # スコアを集計
+    utils.calc_data(datum)
 
 
 def play_game(player1, player2, deck):
     """
-    1回のゲームを行う関数
+    1回のゲームを行い、そのゲームのスコアーをそれぞれ返す関数
     :param player1: Playerクラス
     :param player2: Playerクラス
     :param deck: Deckクラス、作成済みのデッキ
-    return player, score
+    return winner, win_score
     """
     counter = 0
     face_up_or_down = [True, False]  # カードを表で出すか裏で出すか
@@ -50,6 +57,8 @@ def play_game(player1, player2, deck):
 
     deck.shuffle()  # デッキをシャッフルする
     # それぞれのプレイヤーにカードを配る
+    player1.init_hands()  # プレイヤー1のハンドを初期化
+    player2.init_hands()  # プレイヤー2のハンドを初期化
     player1.add_hands([card for card in deck.cards[:7]])
     player2.add_hands([card for card in deck.cards[7:14]])
 
@@ -64,25 +73,25 @@ def play_game(player1, player2, deck):
     while True:
         if len(player1.hands) == 0:
             print('p1の{}枚勝ち!'.format(len(player2.hands)))
-            ret = (player1, len(player2.hands))
+            ret = [player1, len(player2.hands)]
             break
         if len(player2.hands) == 0:
             print('p2の{}枚勝ち!'.format(len(player1.hands)))
-            ret = (player1, len(player2.hands))
+            ret = [player2, len(player1.hands)]
             break
         if len(player1.hands) >= 11:
             print('p2の{}枚勝ち!'.format(len(player1.hands)))
-            ret = (player1, len(player2.hands))
+            ret = [player2, len(player1.hands)]
             break
         if len(player2.hands) >= 11:
             print('p1の{}枚勝ち!'.format(len(player2.hands)))
-            ret = (player1, len(player2.hands))
+            ret = [player1, len(player2.hands)]
             break
 
         field_cards = FieldCards(cards=[], latest_card_rank=0)  # 場を初期化
         #  フィールドが空になるまで繰り返す
         while True:
-            if len(player1.hands) == 0 or len(player1.hands) == 0:
+            if len(player1.hands) == 0 or len(player2.hands) == 0:
                 print('-' * 100)
                 print('勝負が決まりました')
                 break

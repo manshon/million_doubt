@@ -1,3 +1,7 @@
+import numpy as np
+import pandas as pd
+
+
 class MultiElementDelete(list):
     def __delitem__(self, key):
         if isinstance(key, (list, tuple)):
@@ -5,3 +9,18 @@ class MultiElementDelete(list):
                 list.__delitem__(self, index)
         else:
             list.__delitem__(self, key)
+
+
+def calc_data(dataset):
+    """
+
+    :param dataset: [[winner_name, win_score], [winner_name, win_score], ...]
+                    winner_name in [player1, player2]
+    :return: p1_score, p2_score
+    """
+    df = pd.DataFrame(dataset, columns=['winner', 'score'])
+    print(df)
+    p1_score = df.groupby('winner').sum().loc['player1']
+    p2_score = df.groupby('winner').sum().loc['player2']
+
+    return p1_score, p2_score
