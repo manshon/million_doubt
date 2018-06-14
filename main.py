@@ -1,5 +1,7 @@
 import random
-
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from models import Deck, Card, FieldCards, Player
 
 import utils
@@ -27,33 +29,45 @@ def main():
     # for card in deck.cards:
     #     print(card)
 
-    # プレイヤー追加
+    # プレイヤー追加と初期設定
     player1 = Player(name='player1')
     player2 = Player(name='player2')
+    player1.doubt_pct = 0.35
+    player2.doubt_pct = 0.2
 
-    # winner, score = play_game(player1, player2, deck)
+    # 20ゲーム x 50回試行する
+    result_p1 = []
+    for j in range(10):
+        datum = []
+        for i in range(20):
+            data = play_game(player1, player2, deck)
+            datum.append([data[0].name, data[1]])
 
-    # 10回試行する
-    datum = []
-    for i in range(10):
-        data = play_game(player1, player2, deck)
-        datum.append([data[0].name, data[1]])
+        print('-' * 100)
+        print('-' * 100)
+        print('-' * 100)
+        # スコアを集計
+        p1_score, p2_score = utils.calc_data(datum)
+        result_p1.append(p1_score)
+        print('player1のスコア: {} \nplayer2のスコア: {}'.format(p1_score, p2_score))
 
-    # スコアを集計
-    utils.calc_data(datum)
+    df = pd.DataFrame(data=result_p1, columns=['score'])
+    print('##' * 50)
+    print('合計: {} \n平均: {} \n分散: {}'.format(df['score'].sum(), df['score'].mean(), df['score'].var()))
+    df.plot()
+    plt.show()
 
 
 def play_game(player1, player2, deck):
     """
-    1回のゲームを行い、そのゲームのスコアーをそれぞれ返す関数
+    1回のゲームを行い、そのゲームのそれぞれのスコアを返す関数
     :param player1: Playerクラス
     :param player2: Playerクラス
     :param deck: Deckクラス、作成済みのデッキ
     return winner, win_score
     """
-    counter = 0
+    counter = random.choice([0, 1])
     face_up_or_down = [True, False]  # カードを表で出すか裏で出すか
-    doubt_or_through = [True, False]  # カードを表で出すか裏で出すか
 
     deck.shuffle()  # デッキをシャッフルする
     # それぞれのプレイヤーにカードを配る
@@ -131,7 +145,8 @@ def play_game(player1, player2, deck):
                     continue
                 else:
                     print('p1はカードを裏でプレイした')
-                    is_doubt = random.choice(doubt_or_through)
+                    # ダウトする確率
+                    is_doubt = np.random.choice([True, False], p=[player2.doubt_pct, 1-player2.doubt_pct])
                     if is_doubt:  # プレイヤー2がダウト宣言をしたとき
                         print('p2はダウトを宣言した')
                         if play_cards_rank > field_cards.latest_card_rank:  # ダウトコール失敗時の処理
@@ -163,7 +178,7 @@ def play_game(player1, player2, deck):
                 print('*' * 50)
 
                 counter += 1
-                is_face = random.choice(face_up_or_down)  # 表か裏か
+                is_face = np.random.choice(face_up_or_down)  # 表か裏か
                 play_cards, play_cards_rank = player2.play_cards(delete_indices=[0])  # カードをプレイする
                 print('player2は以下のカードをプレイした')
                 print(([card.get_suit_and_rank() for card in play_cards]))
@@ -178,7 +193,7 @@ def play_game(player1, player2, deck):
                     print('p2はカードを表でプレイした')
                     continue
                 else:
-                    is_doubt = random.choice(doubt_or_through)
+                    is_doubt = np.random.choice([True, False], p=[player1.doubt_pct, 1-player1.doubt_pct])
                     if is_doubt:  # プレイヤー1がダウト宣言をしたとき
                         print('p1はダウトを宣言した')
                         if play_cards_rank > field_cards.latest_card_rank:  # ダウト失敗時の処理

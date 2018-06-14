@@ -19,8 +19,10 @@ def calc_data(dataset):
     :return: p1_score, p2_score
     """
     df = pd.DataFrame(dataset, columns=['winner', 'score'])
-    print(df)
-    p1_score = df.groupby('winner').sum().loc['player1']
-    p2_score = df.groupby('winner').sum().loc['player2']
+    sum_p1_score = df.groupby('winner').sum().loc['player1']['score']
+    sum_p2_score = df.groupby('winner').sum().loc['player2']['score']
+
+    p1_score = sum_p1_score - sum_p2_score
+    p2_score = sum_p2_score - sum_p1_score
 
     return p1_score, p2_score
