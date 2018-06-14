@@ -7,64 +7,51 @@ from models import Deck, Card, FieldCards, Player
 
 
 def main():
+    # デッキを作成
     deck = Deck()
     card_nums = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'Joker']
     card_ranks = [12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14]
+    card_suits = ['spade', 'heart', 'diamond', 'club']
     card_mapping = {}
     for (num, rank) in zip(card_nums, card_ranks):
         card_mapping[num] = rank
-    # print(card_mapping)
 
-    card_suits = ['spade', 'heart', 'diamond', 'club']
-
-    # デッキにJoker含むカード54枚を加える
-    for rank in card_ranks[:13]:
+    for rank in card_ranks[:13]:  # デッキにJoker含むカード54枚を加える
         for suit in card_suits:
             card = Card(suit=suit, rank=rank)
             deck.cards.append(card)
-            # for card in deck.cards:
-            #     print(card.get_suit_and_rank())
-            # print(card)
+
     deck.cards.append(Card(suit='*', rank=card_mapping['Joker']))
     deck.cards.append(Card(suit='*', rank=card_mapping['Joker']))
     # print(len(deck.cards))
     # for card in deck.cards:
     #     print(card)
 
-    # デッキをシャッフルする
-    deck.shuffle()
-
-    # プレイヤーに配るカードを7枚ずつ分ける
-    # p1_hands = []
-    # p2_hands = []
-    # for card in deck.cards[:7]:
-    #     p1_hands.append(card)
-    # # print(card)
-    # for card in deck.cards[7:14]:
-    #     p2_hands.append(card)
-    # print('-' * 100)
-
     # プレイヤー追加
-    player1 = Player(hands=[card for card in deck.cards[:7]])
-    player2 = Player(hands=[card for card in deck.cards[7:14]])
+    player1 = Player(name='player1')
+    player2 = Player(name='player2')
 
-    game_result = play_game(player1, player2)
+    winner, winner_score = play_game(player1, player2, deck)
+
+    print(winner.name, winner_score)
 
 
-def play_game(player1, player2):
+def play_game(player1, player2, deck):
     """
     1回のゲームを行う関数
     :param player1: Playerクラス
     :param player2: Playerクラス
+    :param deck: Deckクラス、作成済みのデッキ
     return player, score
     """
-
     counter = 0
     face_up_or_down = [True, False]  # カードを表で出すか裏で出すか
     doubt_or_through = [True, False]  # カードを表で出すか裏で出すか
-    # ゲームが終了する2つの条件
-    normal_finished = player1.hands == [] or player2.hands == []
-    burst_finished = len(player1.hands) >= 11 or len(player2.hands) >= 11
+
+    deck.shuffle()  # デッキをシャッフルする
+    # それぞれのプレイヤーにカードを配る
+    player1.add_hands([card for card in deck.cards[:7]])
+    player2.add_hands([card for card in deck.cards[7:14]])
 
     print('-' * 100)
     print('ゲーム開始')
@@ -95,7 +82,7 @@ def play_game(player1, player2):
         field_cards = FieldCards(cards=[], latest_card_rank=0)  # 場を初期化
         #  フィールドが空になるまで繰り返す
         while True:
-            if normal_finished or burst_finished:
+            if len(player1.hands) == 0 or len(player1.hands) == 0:
                 print('-' * 100)
                 print('勝負が決まりました')
                 break

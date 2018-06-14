@@ -48,12 +48,17 @@ class FieldCards(object):
 
 
 class Player(object):
-    def __init__(self, hands, score=0):
-        self.hands = hands
-        self.score = score
+    def __init__(self, name):
+        self.name = name
+        self.hands = []
+        self.score = 0
 
     def get_hands(self):
         return self.hands
+
+    def add_hands(self, hands):
+        for hand in hands:
+            self.hands.append(hand)
 
     def play_cards(self, delete_indices=[]):
         """
